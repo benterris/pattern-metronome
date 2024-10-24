@@ -248,7 +248,7 @@
     <div class="control-group control-group-sliders">
         <div class="slider-container">
             <label for="bpm">BPM:</label>
-            <input type="range" id="bpm" class="slider-input" min="40" max="500" value="120" step="1">
+            <input type="range" id="bpm" class="slider-input" min="20" max="320" value="120" step="1">
             <span id="bpm-value">120</span>
         </div>
 
@@ -453,7 +453,7 @@
       this.isPlaying = true;
       this.currentBeatIndex = 0;
       this.currentSubdivisionIndex = 0;
-      this.nextNoteTime = this.audioContext.currentTime;
+      this.nextNoteTime = this.audioContext.currentTime + 0.1;
       document.getElementById('playButton').classList.add('playing');
       document.getElementById('playButton').textContent = '⏸︎';
       this.scheduler();
