@@ -10,7 +10,8 @@
             --primary-hover: #4f46e5;
             --bg-color: #f8fafc;
             --surface: #ffffff;
-            --border: #e2e8f0;
+            --secondary: #e2e8f0;
+            --secondary-hover: #979ca3;
             --highlight: #a6b0c4;
             --text: #1e293b;
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -21,7 +22,8 @@
             --primary-hover: #6366f1;
             --bg-color: #0f172a;
             --surface: #1e293b;
-            --border: #334155;
+            --secondary: #334155;
+            --secondary-hover: #516684;
             --highlight: #586270;
             --text: #f1f5f9;
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
@@ -31,7 +33,7 @@
             font-family: system-ui, -apple-system, sans-serif;
             max-width: 900px;
             margin: 0 auto;
-            padding: 32px 20px;
+            padding: 10px 10px;
             background-color: var(--bg-color);
             color: var(--text);
             line-height: 1.5;
@@ -40,19 +42,20 @@
 
         .container {
             background-color: var(--surface);
-            padding: 32px;
+            padding-right: 10px;
+            padding-left: 10px;
             border-radius: 16px;
             box-shadow: var(--shadow);
             position: relative;
             transition: background-color 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
         }
 
         .theme-toggle {
-            position: absolute;
-            top: 32px;
-            right: 32px;
             background: none;
-            border: 1px solid var(--border);
+            transform: translate(0, 10%);
+            border: 1px solid var(--secondary);
             color: var(--text);
             width: 40px;
             height: 40px;
@@ -62,6 +65,10 @@
             align-items: center;
             justify-content: center;
             transition: border-color 0.3s, background-color 0.3s;
+        }
+
+        .spacer {
+            flex-grow: 1;
         }
 
         .theme-toggle:hover {
@@ -83,33 +90,39 @@
             font-size: 2rem;
             font-weight: 600;
             color: var(--text);
-            padding-right: 48px;
+        }
+
+        .control-group-sliders {
+            padding: 10px 20px 10px 20px;
+        }
+
+        .control-group-patterns {
+            padding: 10px;
         }
 
         .control-group {
             background-color: var(--bg-color);
-            padding: 24px;
             border-radius: 12px;
-            margin: 24px 0;
+            margin: 12px 0;
             transition: background-color 0.3s;
         }
 
         .slider-container {
             display: flex;
+            width: 100%;
             align-items: center;
             gap: 16px;
             margin: 16px 0;
         }
 
         .slider-container label {
-            min-width: 120px;
             font-weight: 500;
         }
 
         .slider-container input[type="range"] {
             flex: 1;
             height: 6px;
-            background: var(--border);
+            background: var(--secondary);
             border-radius: 3px;
             appearance: none;
             transition: background-color 0.3s;
@@ -130,10 +143,10 @@
         }
 
         .beat-grid {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-auto-rows: min-content;
             margin: 24px 0;
-            width: 100%;
         }
 
         .beat-container {
@@ -151,20 +164,22 @@
             gap: 4px;
         }
 
+        .slider-input {
+            width: 100%;
+        }
+
         .beat-button {
-            width: 24px;
-            height: 24px;
-            background-color: var(--border);
+            min-height: 24px;
+            background-color: var(--secondary);
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            /*transition: all 0.2s;*/
             padding: 0;
             flex-grow: 1;
         }
 
         .beat-button:hover {
-            transform: scale(1.1);
+            background-color: var(--highlight);
         }
 
         .beat-button.high.active {
@@ -182,6 +197,7 @@
 
         .play-button {
             padding: 12px 32px;
+            margin: 20px;
             background-color: var(--primary);
             color: white;
             border: none;
@@ -197,58 +213,65 @@
         }
 
         .play-button.playing {
-            background-color: #ef4444;
+            background-color: var(--secondary);
         }
 
         .play-button.playing:hover {
-            background-color: #dc2626;
+            background-color: var(--secondary-hover);
+        }
+
+        .header {
+            display: flex;
+            padding: 10px;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>Pattern Metronome</h1>
+    <div class="header">
+        <h1>Metronome</h1>
+        <div class="spacer"></div>
+        <button class="theme-toggle" aria-label="Toggle theme">
+            <!-- Sun icon (shown in dark mode) -->
+            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41"></path>
+            </svg>
+            <!-- Moon icon (shown in light mode) -->
+            <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
+    </div>
 
-    <button class="theme-toggle" aria-label="Toggle theme">
-        <!-- Sun icon (shown in dark mode) -->
-        <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="4"></circle>
-            <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41"></path>
-        </svg>
-        <!-- Moon icon (shown in light mode) -->
-        <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
-    </button>
 
-    <div class="control-group">
+    <div class="control-group control-group-sliders">
         <div class="slider-container">
             <label for="bpm">BPM:</label>
-            <input type="range" id="bpm" min="40" max="500" value="120" step="1">
+            <input type="range" id="bpm" class="slider-input" min="40" max="500" value="120" step="1">
             <span id="bpm-value">120</span>
         </div>
 
         <div class="slider-container">
             <label for="volume">Volume:</label>
-            <input type="range" id="volume" min="0" max="100" value="50" step="1">
+            <input type="range" id="volume" class="slider-input" min="0" max="100" value="50" step="1">
             <span id="volume-value">50%</span>
         </div>
 
         <div class="slider-container">
             <label for="beats">Beats:</label>
-            <input type="range" id="beats" min="1" max="32" value="4" step="1">
+            <input type="range" id="beats" class="slider-input" min="1" max="16" value="4" step="1">
             <span id="beats-value">4</span>
         </div>
 
         <div class="slider-container">
             <label for="subdivisions">Subdivisions:</label>
-            <input type="range" id="subdivisions" min="1" max="8" value="3" step="1">
+            <input type="range" id="subdivisions" class="slider-input" min="1" max="8" value="3" step="1">
             <span id="subdivisions-value">3</span>
         </div>
     </div>
 
-    <div class="control-group">
-        <h3>Beat Pattern</h3>
+    <div class="control-group control-group-patterns">
         <div class="beat-grid" id="beatGrid"></div>
     </div>
 
@@ -282,7 +305,6 @@
       const sunIcon = document.querySelector('.sun-icon');
       const moonIcon = document.querySelector('.moon-icon');
 
-      // Check for saved theme preference, otherwise use system preference
       const getPreferredTheme = () => {
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
@@ -291,12 +313,10 @@
         return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       };
 
-      // Function to set theme
       const setTheme = (theme) => {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
 
-        // Update icon visibility
         if (theme === 'dark') {
           sunIcon.style.display = 'block';
           moonIcon.style.display = 'none';
@@ -306,16 +326,13 @@
         }
       };
 
-      // Initialize theme
       setTheme(getPreferredTheme());
 
-      // Toggle theme when button is clicked
       themeToggle.addEventListener('click', () => {
         const currentTheme = document.documentElement.getAttribute('data-theme');
         setTheme(currentTheme === 'dark' ? 'light' : 'dark');
       });
 
-      // Listen for system theme changes
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
         if (!localStorage.getItem('theme')) {
           setTheme(e.matches ? 'dark' : 'light');
@@ -452,14 +469,14 @@
       this.currentSubdivisionIndex = 0;
       this.nextNoteTime = this.audioContext.currentTime;
       document.getElementById('playButton').classList.add('playing');
-      document.getElementById('playButton').textContent = 'Stop';
+      document.getElementById('playButton').textContent = '⏸︎';
       this.scheduler();
     }
 
     stop() {
       this.isPlaying = false;
       document.getElementById('playButton').classList.remove('playing');
-      document.getElementById('playButton').textContent = 'Play';
+      document.getElementById('playButton').textContent = '⏵︎';
       this.clearCurrentBeatVisual();
     }
 
@@ -528,8 +545,7 @@
     }
   }
 
-  // Initialize the metronome
-  const metronome = new Metronome();
+  new Metronome();
 </script>
 </body>
 </html>
