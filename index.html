@@ -54,7 +54,6 @@
 
         .theme-toggle {
             background: none;
-            transform: translate(0, 10%);
             border: 1px solid var(--secondary);
             color: var(--text);
             width: 40px;
@@ -86,7 +85,7 @@
         }
 
         h1 {
-            margin-top: 0;
+            margin: 10px;
             font-size: 2rem;
             font-weight: 600;
             color: var(--text);
@@ -222,7 +221,29 @@
 
         .header {
             display: flex;
+            justify-content: space-between;
+            align-content: center;
+            align-items: center;
             padding: 10px;
+        }
+
+        .pattern-presets {
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            background-color: var(--secondary);
+            color: var(--text);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            text-align: center;
+            height: min-content;
+            /*margin-right: 16px;*/
+        }
+
+        .pattern-presets:focus {
+            outline: none;
+            border-color: var(--secondary-hover);
         }
     </style>
 </head>
@@ -230,7 +251,13 @@
 <div class="container">
     <div class="header">
         <h1>Metronome</h1>
-        <div class="spacer"></div>
+        <select id="patternPresets" class="pattern-presets">
+            <option value="">Presets</option>
+            <option value="standard">Standard 4/4</option>
+            <option value="waltz">Waltz 3/4</option>
+            <option value="practice">Practice</option>
+            <option value="bossa">Bossa Nova</option>
+        </select>
         <button class="theme-toggle" aria-label="Toggle theme">
             <!-- Sun icon (shown in dark mode) -->
             <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -273,6 +300,53 @@
 </div>
 
 <script>
+
+  const presets = {
+    standard: {
+      beats: 4,
+      subdivisions: 3,
+      pattern: [
+        {high: [true, false, false], low: [false, false, false]},
+        {high: [true, false, false], low: [false, false, false]},
+        {high: [true, false, false], low: [false, false, false]},
+        {high: [true, false, false], low: [false, false, false]}
+      ]
+    },
+    waltz: {
+      beats: 3,
+      subdivisions: 3,
+      pattern: [
+        {high: [true, false, false], low: [false, false, false]},
+        {high: [false, false, false], low: [true, false, false]},
+        {high: [false, false, false], low: [true, false, false]}
+      ]
+    },
+    practice: {
+      beats: 4,
+      subdivisions: 3,
+      pattern: [
+        {high: [true, false, false], low: [false, false, true]},
+        {high: [false, false, false], low: [false, true, true]},
+        {high: [false, false, false], low: [false, true, false]},
+        {high: [false, false, false], low: [true, false, false]}
+      ]
+    },
+    bossa: {
+      beats: 8,
+      subdivisions: 2,
+      pattern: [
+        {high: [true, false], low: [false, false]},
+        {high: [false, false], low: [false, true]},
+        {high: [false, false], low: [false, false]},
+        {high: [false, false], low: [true, false]},
+        {high: [false, false], low: [false, false]},
+        {high: [false, false], low: [true, false]},
+        {high: [false, false], low: [false, true]},
+        {high: [false, false], low: [false, false]},
+      ]
+    }
+  };
+
   class Metronome {
     constructor() {
       this.audioContext = null;
@@ -285,7 +359,7 @@
       this.subdivisions = 3;
       this.beatPattern = this.createInitialPattern();
       this.scheduleAheadTime = 0.1;
-      this.lookahead = 25.0;
+      this.lookahead = 10.0;
 
       this.setupTheme();
       this.setupEventListeners();
@@ -377,6 +451,18 @@
           this.start();
         }
       });
+
+      document.getElementById('patternPresets').addEventListener('change', (e) => {
+        const preset = presets[e.target.value];
+        if (preset) {
+          document.getElementById('beats').value = preset.beats;
+          document.getElementById('subdivisions').value = preset.subdivisions;
+          this.updateBeatPattern(preset.beats, preset.subdivisions);
+          this.beatPattern = JSON.parse(JSON.stringify(preset.pattern));
+          this.createBeatGrid();
+        }
+      });
+
     }
 
     updateBeatPattern(newBeats, newSubdivs) {
