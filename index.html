@@ -296,7 +296,7 @@
         <div class="beat-grid" id="beatGrid"></div>
     </div>
 
-    <button id="playButton" class="play-button">⏵︎</button>
+    <button id="playButton" class="play-button">Play</button>
 </div>
 
 <script>
@@ -541,14 +541,14 @@
       this.currentSubdivisionIndex = 0;
       this.nextNoteTime = this.audioContext.currentTime + 0.1;
       document.getElementById('playButton').classList.add('playing');
-      document.getElementById('playButton').textContent = '⏸︎';
+      document.getElementById('playButton').textContent = 'Pause';
       this.scheduler();
     }
 
     stop() {
       this.isPlaying = false;
       document.getElementById('playButton').classList.remove('playing');
-      document.getElementById('playButton').textContent = '⏵︎';
+      document.getElementById('playButton').textContent = 'Play'
       this.clearCurrentBeatVisual();
     }
 
