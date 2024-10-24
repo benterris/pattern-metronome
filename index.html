@@ -253,12 +253,6 @@
         </div>
 
         <div class="slider-container">
-            <label for="volume">Volume:</label>
-            <input type="range" id="volume" class="slider-input" min="0" max="100" value="50" step="1">
-            <span id="volume-value">50%</span>
-        </div>
-
-        <div class="slider-container">
             <label for="beats">Beats:</label>
             <input type="range" id="beats" class="slider-input" min="1" max="16" value="4" step="1">
             <span id="beats-value">4</span>
@@ -286,7 +280,6 @@
       this.currentSubdivisionIndex = 0;
       this.isPlaying = false;
       this.tempo = 120;
-      this.volume = 0.5;
       this.nextNoteTime = 0;
       this.numberOfBeats = 4;
       this.subdivisions = 3;
@@ -358,13 +351,6 @@
       bpmSlider.addEventListener('input', (e) => {
         this.tempo = parseInt(e.target.value);
         bpmValue.textContent = this.tempo;
-      });
-
-      const volumeSlider = document.getElementById('volume');
-      const volumeValue = document.getElementById('volume-value');
-      volumeSlider.addEventListener('input', (e) => {
-        this.volume = parseInt(e.target.value) / 100;
-        volumeValue.textContent = `${e.target.value}%`;
       });
 
       const beatsSlider = document.getElementById('beats');
@@ -513,19 +499,35 @@
       const osc = this.audioContext.createOscillator();
       const gainNode = this.audioContext.createGain();
 
-      osc.connect(gainNode);
+      // Add a bandpass filter to shape the sound
+      const filter = this.audioContext.createBiquadFilter();
+      filter.type = 'bandpass';
+
+      // Connect the audio nodes
+      osc.connect(filter);
+      filter.connect(gainNode);
       gainNode.connect(this.audioContext.destination);
 
+      // Set frequency and filter characteristics based on type
       if (type === 'high') {
-        osc.frequency.value = 1000;
-        gainNode.gain.value = this.volume;
+        osc.frequency.value = 2500;  // Higher frequency for sharp click
+        filter.frequency.value = 2500;
+        filter.Q.value = 1.0;        // Moderate resonance
       } else {
-        osc.frequency.value = 800;
-        gainNode.gain.value = this.volume * 0.7;
+        osc.frequency.value = 1500;  // Lower frequency for duller click
+        filter.frequency.value = 1500;
+        filter.Q.value = 0.7;        // Less resonance for duller sound
+        gainNode.gain.value = 0.8;
       }
 
-      osc.start(time);
-      osc.stop(time + 0.1);
+      // Create very quick attack and decay for click-like sound
+      const now = time || this.audioContext.currentTime;
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(gainNode.gain.value, now + 0.001);  // 1ms attack
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.03);            // 30ms decay
+
+      osc.start(now);
+      osc.stop(now + 0.03);  // Stop after 30ms
     }
 
     clearCurrentBeatVisual() {
