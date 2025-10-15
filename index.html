@@ -298,13 +298,6 @@
 <div class="container">
     <div class="header">
         <h1>Metronome</h1>
-        <select id="patternPresets" class="pattern-presets">
-            <option value="">Presets</option>
-            <option value="standard">Standard 4/4</option>
-            <option value="waltz">Waltz 3/4</option>
-            <option value="practice">Practice</option>
-            <option value="bossa">Bossa Nova</option>
-        </select>
         <button class="theme-toggle" aria-label="Toggle theme">
             <!-- Sun icon (shown in dark mode) -->
             <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -316,6 +309,20 @@
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
             </svg>
         </button>
+    </div>
+    <div class="header">
+        <select id="soundPacks" class="pattern-presets">
+            <option value="classic">Classic</option>
+            <option value="woodblock">Woodblock</option>
+            <option value="electronic">Electronic</option>
+        </select>
+        <select id="patternPresets" class="pattern-presets">
+            <option value="">Presets</option>
+            <option value="standard">Standard 4/4</option>
+            <option value="waltz">Waltz 3/4</option>
+            <option value="practice">Practice</option>
+            <option value="bossa">Bossa Nova</option>
+        </select>
     </div>
 
 
@@ -355,6 +362,72 @@
 </div>
 
 <script>
+
+  const soundPacks = {
+    classic: {
+      name: 'Classic',
+      high: {
+        frequency: 2500,
+        waveform: 'sine',
+        filterFrequency: 2500,
+        filterQ: 1.0,
+        gain: 1.0,
+        attack: 0.001,
+        decay: 0.03
+      },
+      low: {
+        frequency: 1500,
+        waveform: 'sine',
+        filterFrequency: 1500,
+        filterQ: 0.7,
+        gain: 0.8,
+        attack: 0.001,
+        decay: 0.03
+      }
+    },
+    woodblock: {
+      name: 'Woodblock',
+      high: {
+        frequency: 800,
+        waveform: 'square',
+        filterFrequency: 1200,
+        filterQ: 2.0,
+        gain: 0.6,
+        attack: 0.002,
+        decay: 0.05
+      },
+      low: {
+        frequency: 400,
+        waveform: 'square',
+        filterFrequency: 600,
+        filterQ: 1.5,
+        gain: 0.5,
+        attack: 0.002,
+        decay: 0.05
+      }
+    },
+    electronic: {
+      name: 'Electronic',
+      high: {
+        frequency: 2500,
+        waveform: 'triangle',
+        filterFrequency: 4000,
+        filterQ: 0.5,
+        gain: 0.7,
+        attack: 0.0005,
+        decay: 0.02
+      },
+      low: {
+        frequency: 1500,
+        waveform: 'triangle',
+        filterFrequency: 2500,
+        filterQ: 0.5,
+        gain: 0.6,
+        attack: 0.0005,
+        decay: 0.02
+      }
+    }
+  };
 
   const presets = {
     standard: {
@@ -417,6 +490,7 @@
       this.beatPattern = this.createInitialPattern();
       this.scheduleAheadTime = 0.1;
       this.lookahead = 5.0;
+      this.currentSoundPack = soundPacks['classic'];
 
       this.setupTheme();
       this.setupEventListeners();
@@ -537,6 +611,10 @@
         document.getElementById('bpm').value = this.tempo;
       });
 
+
+      document.getElementById('soundPacks').addEventListener('change', (e) => {
+        this.currentSoundPack = soundPacks[e.target.value] || soundPacks['classic'];
+      });
 
       document.getElementById('patternPresets').addEventListener('change', (e) => {
         const preset = presets[e.target.value];
@@ -677,30 +755,26 @@
     }
 
     playClick(time, type) {
+      const soundPack = this.currentSoundPack;
+      const clickParams = type === 'high' ? soundPack.high : soundPack.low;
+
       const osc = this.audioContext.createOscillator();
+      osc.type = clickParams.waveform;
+      osc.frequency.value = clickParams.frequency;
 
       osc.connect(this.filter);
 
-      if (type === 'high') {
-        osc.frequency.value = 2500;  // Higher frequency for sharp click
-        this.filter.frequency.value = 2500;
-        this.filter.Q.value = 1.0;        // Moderate resonance
-        this.gainNode.gain.value = 1.0;
-      } else {
-        osc.frequency.value = 1500;  // Lower frequency for duller click
-        this.filter.frequency.value = 1500;
-        this.filter.Q.value = 0.7;        // Less resonance for duller sound
-        this.gainNode.gain.value = 0.8;
-      }
+      this.filter.frequency.value = clickParams.filterFrequency;
+      this.filter.Q.value = clickParams.filterQ;
 
-      // Create very quick attack and decay for click-like sound
+      // Create attack and decay envelope for click-like sound
       const now = time || this.audioContext.currentTime;
       this.gainNode.gain.setValueAtTime(0, now);
-      this.gainNode.gain.linearRampToValueAtTime(this.gainNode.gain.value, now + 0.001);  // 1ms attack
-      this.gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.03);            // 30ms decay
+      this.gainNode.gain.linearRampToValueAtTime(clickParams.gain, now + clickParams.attack);
+      this.gainNode.gain.exponentialRampToValueAtTime(0.001, now + clickParams.decay);
 
       osc.start(now);
-      osc.stop(now + 0.03);  // Stop after 30ms
+      osc.stop(now + clickParams.decay);
     }
 
     clearCurrentBeatVisual() {
