@@ -405,6 +405,8 @@
   class Metronome {
     constructor() {
       this.audioContext = null;
+      this.gainNode = null;
+      this.filter = null;
       this.currentBeatIndex = 0;
       this.currentSubdivisionIndex = 0;
       this.isPlaying = false;
@@ -618,6 +620,13 @@
 
       if (!this.audioContext) {
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        this.gainNode = this.audioContext.createGain();
+        this.filter = this.audioContext.createBiquadFilter();
+        this.filter.type = 'bandpass';
+
+        this.filter.connect(this.gainNode);
+        this.gainNode.connect(this.audioContext.destination);
       }
 
       this.isPlaying = true;
@@ -669,34 +678,26 @@
 
     playClick(time, type) {
       const osc = this.audioContext.createOscillator();
-      const gainNode = this.audioContext.createGain();
 
-      // Add a bandpass filter to shape the sound
-      const filter = this.audioContext.createBiquadFilter();
-      filter.type = 'bandpass';
+      osc.connect(this.filter);
 
-      // Connect the audio nodes
-      osc.connect(filter);
-      filter.connect(gainNode);
-      gainNode.connect(this.audioContext.destination);
-
-      // Set frequency and filter characteristics based on type
       if (type === 'high') {
         osc.frequency.value = 2500;  // Higher frequency for sharp click
-        filter.frequency.value = 2500;
-        filter.Q.value = 1.0;        // Moderate resonance
+        this.filter.frequency.value = 2500;
+        this.filter.Q.value = 1.0;        // Moderate resonance
+        this.gainNode.gain.value = 1.0;
       } else {
         osc.frequency.value = 1500;  // Lower frequency for duller click
-        filter.frequency.value = 1500;
-        filter.Q.value = 0.7;        // Less resonance for duller sound
-        gainNode.gain.value = 0.8;
+        this.filter.frequency.value = 1500;
+        this.filter.Q.value = 0.7;        // Less resonance for duller sound
+        this.gainNode.gain.value = 0.8;
       }
 
       // Create very quick attack and decay for click-like sound
       const now = time || this.audioContext.currentTime;
-      gainNode.gain.setValueAtTime(0, now);
-      gainNode.gain.linearRampToValueAtTime(gainNode.gain.value, now + 0.001);  // 1ms attack
-      gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.03);            // 30ms decay
+      this.gainNode.gain.setValueAtTime(0, now);
+      this.gainNode.gain.linearRampToValueAtTime(this.gainNode.gain.value, now + 0.001);  // 1ms attack
+      this.gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.03);            // 30ms decay
 
       osc.start(now);
       osc.stop(now + 0.03);  // Stop after 30ms
