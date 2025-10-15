@@ -414,7 +414,7 @@
       this.subdivisions = 3;
       this.beatPattern = this.createInitialPattern();
       this.scheduleAheadTime = 0.1;
-      this.lookahead = 10.0;
+      this.lookahead = 5.0;
 
       this.setupTheme();
       this.setupEventListeners();
@@ -649,7 +649,9 @@
       }
 
       if (this.isPlaying) {
-        setTimeout(() => this.scheduler(), this.lookahead);
+        const timeUntilNextNote = (this.nextNoteTime - this.audioContext.currentTime) * 1000;
+        const nextSchedulerCall = Math.max(this.lookahead, timeUntilNextNote - this.scheduleAheadTime * 1000);
+        setTimeout(() => this.scheduler(), nextSchedulerCall);
       }
     }
 
