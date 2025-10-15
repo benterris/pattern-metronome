@@ -312,12 +312,20 @@
     </div>
     <div class="header">
         <select id="soundPacks" class="pattern-presets">
+            <option selected disabled hidden value="">Sound</option>
             <option value="classic">Classic</option>
             <option value="woodblock">Woodblock</option>
             <option value="electronic">Electronic</option>
+            <option value="cowbell">Cowbell</option>
+            <option value="rimshot">Rimshot</option>
+            <option value="beep">Beep</option>
+            <option value="laser">Laser</option>
+            <option value="deep">Deep</option>
+            <option value="chirp">Chirp</option>
+            <option value="eight08">808</option>
         </select>
         <select id="patternPresets" class="pattern-presets">
-            <option value="">Presets</option>
+            <option selected disabled hidden value="">Presets</option>
             <option value="standard">Standard 4/4</option>
             <option value="waltz">Waltz 3/4</option>
             <option value="practice">Practice</option>
@@ -425,6 +433,153 @@
         gain: 0.6,
         attack: 0.0005,
         decay: 0.02
+      }
+    },
+    cowbell: {
+      name: 'Cowbell',
+      high: {
+        frequency: 1047,
+        waveform: 'square',
+        filterFrequency: 3000,
+        filterQ: 3.5,
+        gain: 0.9,
+        attack: 0.003,
+        decay: 0.05
+      },
+      low: {
+        frequency: 587,
+        waveform: 'square',
+        filterFrequency: 1800,
+        filterQ: 3.0,
+        gain: 0.75,
+        attack: 0.003,
+        decay: 0.05
+      }
+    },
+    rimshot: {
+      name: 'Rimshot',
+      high: {
+        frequency: 4000,
+        waveform: 'square',
+        filterFrequency: 5000,
+        filterQ: 8.0,
+        gain: 0.5,
+        attack: 0.0001,
+        decay: 0.015
+      },
+      low: {
+        frequency: 2800,
+        waveform: 'square',
+        filterFrequency: 3500,
+        filterQ: 6.0,
+        gain: 0.4,
+        attack: 0.0001,
+        decay: 0.012
+      }
+    },
+    beep: {
+      name: 'Beep',
+      high: {
+        frequency: 1000,
+        waveform: 'sine',
+        filterFrequency: 1000,
+        filterQ: 0.3,
+        gain: 0.6,
+        attack: 0.005,
+        decay: 0.08
+      },
+      low: {
+        frequency: 600,
+        waveform: 'sine',
+        filterFrequency: 600,
+        filterQ: 0.3,
+        gain: 0.5,
+        attack: 0.005,
+        decay: 0.08
+      }
+    },
+    laser: {
+      name: 'Laser',
+      high: {
+        frequency: 5000,
+        waveform: 'sawtooth',
+        filterFrequency: 8000,
+        filterQ: 1.5,
+        gain: 0.4,
+        attack: 0.001,
+        decay: 0.04
+      },
+      low: {
+        frequency: 3000,
+        waveform: 'sawtooth',
+        filterFrequency: 5000,
+        filterQ: 1.2,
+        gain: 0.35,
+        attack: 0.001,
+        decay: 0.04
+      }
+    },
+    deep: {
+      name: 'Deep',
+      high: {
+        frequency: 220,
+        waveform: 'sine',
+        filterFrequency: 440,
+        filterQ: 2.0,
+        gain: 0.9,
+        attack: 0.005,
+        decay: 0.05
+      },
+      low: {
+        frequency: 110,
+        waveform: 'sine',
+        filterFrequency: 220,
+        filterQ: 1.5,
+        gain: 0.8,
+        attack: 0.005,
+        decay: 0.05
+      }
+    },
+    chirp: {
+      name: 'Chirp',
+      high: {
+        frequency: 6000,
+        waveform: 'triangle',
+        filterFrequency: 7000,
+        filterQ: 4.0,
+        gain: 0.45,
+        attack: 0.002,
+        decay: 0.025
+      },
+      low: {
+        frequency: 4500,
+        waveform: 'triangle',
+        filterFrequency: 5500,
+        filterQ: 3.0,
+        gain: 0.4,
+        attack: 0.002,
+        decay: 0.022
+      }
+    },
+    eight08: {
+      name: '808',
+      high: {
+        frequency: 1500,
+        waveform: 'triangle',
+        filterFrequency: 2000,
+        filterQ: 1.0,
+        gain: 0.7,
+        attack: 0.004,
+        decay: 0.06
+      },
+      low: {
+        frequency: 900,
+        waveform: 'triangle',
+        filterFrequency: 1200,
+        filterQ: 0.8,
+        gain: 0.65,
+        attack: 0.004,
+        decay: 0.055
       }
     }
   };
