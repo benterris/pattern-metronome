@@ -9,7 +9,7 @@ class Metronome {
     this.tempo = 120;
     this.nextNoteTime = 0;
     this.numberOfBeats = 4;
-    this.subdivisions = 3;
+    this.subdivisions = 1;
     this.beatPattern = this.createInitialPattern();
     this.currentSoundPack = soundPacks['woodblock'];
 
@@ -491,12 +491,12 @@ const soundPacks = {
 const presets = {
   standard: {
     beats: 4,
-    subdivisions: 3,
+    subdivisions: 1,
     pattern: [
-      {high: [true, false, false], low: [false, false, false]},
-      {high: [true, false, false], low: [false, false, false]},
-      {high: [true, false, false], low: [false, false, false]},
-      {high: [true, false, false], low: [false, false, false]}
+      {high: [true], low: [false]},
+      {high: [false], low: [true]},
+      {high: [false], low: [true]},
+      {high: [false], low: [true]}
     ]
   },
   waltz: {
@@ -506,6 +506,44 @@ const presets = {
       {high: [true, false, false], low: [false, false, false]},
       {high: [false, false, false], low: [true, false, false]},
       {high: [false, false, false], low: [true, false, false]}
+    ]
+  },
+  clave: {
+    beats: 4,
+    subdivisions: 2,
+    pattern: [
+      {high: [true, false], low: [false, false]},
+      {high: [false, true], low: [false, false]},
+      {high: [false, false], low: [false, false]},
+      {high: [true, false], low: [false, false]},
+    ]
+  },
+  clave32: {
+    beats: 8,
+    subdivisions: 2,
+    pattern: [
+      {high: [true, false], low: [false, false]},
+      {high: [false, true], low: [false, false]},
+      {high: [false, false], low: [false, false]},
+      {high: [true, false], low: [false, false]},
+      {high: [false, false], low: [false, false]},
+      {high: [true, false], low: [false, false]},
+      {high: [true, false], low: [false, false]},
+      {high: [false, false], low: [false, false]},
+    ]
+  },
+  clave23: {
+    beats: 8,
+    subdivisions: 2,
+    pattern: [
+      {high: [false, false], low: [false, false]},
+      {high: [true, false], low: [false, false]},
+      {high: [true, false], low: [false, false]},
+      {high: [false, false], low: [false, false]},
+      {high: [true, false], low: [false, false]},
+      {high: [false, true], low: [false, false]},
+      {high: [false, false], low: [false, false]},
+      {high: [true, false], low: [false, false]},
     ]
   },
   practice: {
