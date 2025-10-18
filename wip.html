@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Metronome</title>
+</head>
+<body>
+<button id="startButton">Start Metronome</button>
+<button id="stopButton">Stop Metronome</button>
+<script src="wip.js"></script>
+<script>
+  const metro = new Metro();
+
+  const startButton = document.getElementById('startButton');
+  const stopButton = document.getElementById('stopButton');
+
+  startButton.addEventListener('click', () => {
+    metro.start();
+  });
+
+  stopButton.addEventListener('click', () => {
+    metro.stop();
+  });
+</script>
+</body>
+</html>

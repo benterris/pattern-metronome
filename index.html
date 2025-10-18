@@ -371,7 +371,6 @@
 
   const soundPacks = {
     woodblock: {
-      name: 'Woodblock', // TODO: remove names here
       high: {
         frequency: 2500,
         waveform: 'sine',
@@ -392,13 +391,12 @@
       }
     },
     electronic: {
-      name: 'Electronic',
       high: {
         frequency: 800,
         waveform: 'square',
         filterFrequency: 1200,
         filterQ: 2.0,
-        gain: 0.6,
+        gain: 1.0,
         attack: 0.002,
         decay: 0.05
       },
@@ -413,13 +411,12 @@
       }
     },
     dry: {
-      name: 'Dry',
       high: {
         frequency: 2500,
         waveform: 'triangle',
         filterFrequency: 4000,
         filterQ: 0.5,
-        gain: 0.7,
+        gain: 1.0,
         attack: 0.0005,
         decay: 0.02
       },
@@ -434,13 +431,12 @@
       }
     },
     cowbell: {
-      name: 'Cowbell',
       high: {
         frequency: 1047,
         waveform: 'square',
         filterFrequency: 3000,
         filterQ: 3.5,
-        gain: 0.9,
+        gain: 1.0,
         attack: 0.003,
         decay: 0.05
       },
@@ -455,13 +451,12 @@
       }
     },
     dropplets: {
-      name: 'Dropplets',
       high: {
         frequency: 4000,
         waveform: 'square',
         filterFrequency: 5000,
         filterQ: 8.0,
-        gain: 0.5,
+        gain: 1.0,
         attack: 0.0001,
         decay: 0.015
       },
@@ -470,19 +465,18 @@
         waveform: 'square',
         filterFrequency: 3500,
         filterQ: 6.0,
-        gain: 0.4,
+        gain: 0.8,
         attack: 0.0001,
         decay: 0.012
       }
     },
     beep: {
-      name: 'Beep',
       high: {
         frequency: 1000,
         waveform: 'sine',
         filterFrequency: 1000,
         filterQ: 0.3,
-        gain: 0.6,
+        gain: 1.0,
         attack: 0.005,
         decay: 0.08
       },
@@ -497,13 +491,12 @@
       }
     },
     xylo: {
-      name: 'Xylo',
       high: {
         frequency: 5000,
         waveform: 'sawtooth',
         filterFrequency: 8000,
         filterQ: 1.5,
-        gain: 0.4,
+        gain: 1.0,
         attack: 0.001,
         decay: 0.04
       },
@@ -512,19 +505,18 @@
         waveform: 'sawtooth',
         filterFrequency: 5000,
         filterQ: 1.2,
-        gain: 0.35,
+        gain: 0.8,
         attack: 0.001,
         decay: 0.04
       }
     },
     deep: {
-      name: 'Deep',
       high: {
         frequency: 220,
         waveform: 'sine',
         filterFrequency: 440,
         filterQ: 2.0,
-        gain: 0.9,
+        gain: 1.0,
         attack: 0.005,
         decay: 0.05
       },
@@ -599,8 +591,6 @@
       this.numberOfBeats = 4;
       this.subdivisions = 3;
       this.beatPattern = this.createInitialPattern();
-      this.scheduleAheadTime = 0.1;
-      this.lookahead = 5.0;
       this.currentSoundPack = soundPacks['woodblock'];
 
       this.setupTheme();
@@ -686,11 +676,11 @@
       });
 
       const playButton = document.getElementById('playButton');
-      playButton.addEventListener('click', () => {
+      playButton.addEventListener('click', async () => {
         if (this.isPlaying) {
           this.stop();
         } else {
-          this.start();
+          await this.start();
         }
       });
 
@@ -801,10 +791,10 @@
         grid.appendChild(beatContainer);
       }
 
-      this.updateCurrentBeatVisual();
+      this.updateActiveBeatAndSubdivisionVisual(0, 0);
     }
 
-    start() {
+    async start() {
       if (this.isPlaying) return;
 
       if (!this.audioContext) {
@@ -824,7 +814,7 @@
       this.nextNoteTime = this.audioContext.currentTime + 0.1;
       document.getElementById('playButton').classList.add('playing');
       document.getElementById('playButton').textContent = 'Pause';
-      this.scheduler();
+      await this.playLoop();
     }
 
     stop() {
@@ -834,30 +824,41 @@
       this.clearCurrentBeatVisual();
     }
 
-    scheduler() {
-      while (this.nextNoteTime < this.audioContext.currentTime + this.scheduleAheadTime) {
+
+    async playLoop() {
+      while (this.isPlaying) {
         if (this.beatPattern[this.currentBeatIndex].high[this.currentSubdivisionIndex]) {
           this.playClick(this.nextNoteTime, 'high');
         }
         if (this.beatPattern[this.currentBeatIndex].low[this.currentSubdivisionIndex]) {
           this.playClick(this.nextNoteTime, 'low');
         }
-        this.updateCurrentBeatVisual();
-        this.nextNote();
-      }
 
-      if (this.isPlaying) {
-        const timeUntilNextNote = (this.nextNoteTime - this.audioContext.currentTime) * 1000;
-        const nextSchedulerCall = Math.max(this.lookahead, timeUntilNextNote - this.scheduleAheadTime * 1000);
-        setTimeout(() => this.scheduler(), nextSchedulerCall);
+        this.nextNoteTime += this.getSubdivisionDuration();
+        this.incrementBeatAndSubdivisionIndex();
+        this.scheduleVisualUpdateAtNotePlayTime(this.currentBeatIndex, this.currentSubdivisionIndex);
+
+        const nextMidBeatTime = this.nextNoteTime - this.getSubdivisionDuration() / 2
+        const timeUntilNextMidBeat = nextMidBeatTime - this.audioContext.currentTime
+
+        await new Promise(r => setTimeout(r, timeUntilNextMidBeat * 1000));
       }
     }
 
-    nextNote() {
-      const secondsPerBeat = 60.0 / this.tempo;
-      const secondsPerSubdivision = secondsPerBeat / this.subdivisions;
-      this.nextNoteTime += secondsPerSubdivision;
+    scheduleVisualUpdateAtNotePlayTime(beatIndex, subdivisionIndex) {
+      setTimeout(
+          () => this.updateActiveBeatAndSubdivisionVisual(beatIndex, subdivisionIndex),
+          (this.nextNoteTime - this.audioContext.currentTime) * 1000
+      );
 
+    }
+
+    getSubdivisionDuration() {
+      const secondsPerBeat = 60.0 / this.tempo;
+      return secondsPerBeat / this.subdivisions;
+    }
+
+    incrementBeatAndSubdivisionIndex() {
       this.currentSubdivisionIndex++;
       if (this.currentSubdivisionIndex >= this.subdivisions) {
         this.currentSubdivisionIndex = 0;
@@ -878,14 +879,12 @@
       this.filter.frequency.value = clickParams.filterFrequency;
       this.filter.Q.value = clickParams.filterQ;
 
-      // Create attack and decay envelope for click-like sound
-      const now = time || this.audioContext.currentTime;
-      this.gainNode.gain.setValueAtTime(0, now);
-      this.gainNode.gain.linearRampToValueAtTime(clickParams.gain, now + clickParams.attack);
-      this.gainNode.gain.exponentialRampToValueAtTime(0.001, now + clickParams.decay);
+      this.gainNode.gain.setValueAtTime(0, time);
+      this.gainNode.gain.linearRampToValueAtTime(clickParams.gain, time + clickParams.attack);
+      this.gainNode.gain.exponentialRampToValueAtTime(0.001, time + clickParams.decay);
 
-      osc.start(now);
-      osc.stop(now + clickParams.decay);
+      osc.start(time);
+      osc.stop(time + clickParams.decay);
     }
 
     clearCurrentBeatVisual() {
@@ -893,12 +892,12 @@
       buttons.forEach(button => button.classList.remove('current'));
     }
 
-    updateCurrentBeatVisual() {
+    updateActiveBeatAndSubdivisionVisual(beatIndex, subdivisionIndex) {
       if (!this.isPlaying) return;
 
       this.clearCurrentBeatVisual();
-      const currentHighButton = document.querySelector(`.beat-container:nth-child(${this.currentBeatIndex + 1}) .subdivision-container:first-child .beat-button:nth-child(${this.currentSubdivisionIndex + 1})`);
-      const currentLowButton = document.querySelector(`.beat-container:nth-child(${this.currentBeatIndex + 1}) .subdivision-container:last-child .beat-button:nth-child(${this.currentSubdivisionIndex + 1})`);
+      const currentHighButton = document.querySelector(`.beat-container:nth-child(${beatIndex + 1}) .subdivision-container:first-child .beat-button:nth-child(${subdivisionIndex + 1})`);
+      const currentLowButton = document.querySelector(`.beat-container:nth-child(${beatIndex + 1}) .subdivision-container:last-child .beat-button:nth-child(${subdivisionIndex + 1})`);
 
       if (currentHighButton) currentHighButton.classList.add('current');
       if (currentLowButton) currentLowButton.classList.add('current');
